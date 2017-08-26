@@ -6,6 +6,9 @@
   "repository": "https://github.com/Ivshti/bitproperty-token",
   "author": "Ivo Georgiev",
   "license": "MIT",
+  "scripts": {
+    "test": "truffle test"
+  },
   "dependencies": {
     "bluebird": "^3.5.0",
     "truffle": "^3.2.5"
