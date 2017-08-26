@@ -1,0 +1,13 @@
+{
+  "name": "bitproperty-token",
+  "version": "1.0.0",
+  "description": "BitProperty initial token sale contracts",
+  "main": "index.js",
+  "repository": "https://github.com/Ivshti/bitproperty-token",
+  "author": "Ivo Georgiev",
+  "license": "MIT",
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "truffle": "^3.2.5"
+  }
+}
