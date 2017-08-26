@@ -9,14 +9,12 @@ contract('ADXToken', function(accounts) {
   var crowdsale;
 
   var EXPECT_FOR_ONE_ETH = 11700000; // 900*1.3*10000
-  var EXPECT_FOR_ONE_ETH_WEEK = 900*1.15*10000;
-  var EXPECT_FOR_ONE_ETH_MONTH = 900*10000;
 
   var ownerAddr = web3.eth.accounts[1];
   var adexTeamAddr = web3.eth.accounts[9];
   var adexFundAddr = web3.eth.accounts[8];
 
-  var participiants = web3.eth.accounts.slice(3, 8).map(account => {
+  var participiants = web3.eth.accounts.slice(2, 8).map(account => {
     return {
       account: account,
       sent: web3.toWei(1, 'ether')
@@ -99,13 +97,21 @@ contract('ADXToken', function(accounts) {
   }
 
   it('Should allow to send ETH in exchange of Tokens - first day', testExchange(1, EXPECT_FOR_ONE_ETH))
-  
-  it('Change time to first week bonus', moveTime(3*24*60*60 + 30))
-  it('Should allow to send ETH in exchange of Tokens - first week', testExchange(2, EXPECT_FOR_ONE_ETH_WEEK))
-  
-  it('Change time to first month', moveTime(7*24*60*60 + 30))
-  it('Should allow to send ETH in exchange of Tokens - regular price', testExchange(3, EXPECT_FOR_ONE_ETH_MONTH))
 
+  it('Should allow to send ETH in exchange of Tokens - first day, again', testExchange(2, EXPECT_FOR_ONE_ETH))
+  
+  it('Change time to next day', moveTime(1*24*60*60 + 30))
+  it('Should allow to send ETH in exchange of Tokens - second day', testExchange(3, EXPECT_FOR_ONE_ETH * 0.9))
+
+  it('Change time to next day', moveTime(1*24*60*60 + 30))
+  it('Should allow to send ETH in exchange of Tokens - third day', testExchange(4, EXPECT_FOR_ONE_ETH * 0.9 * 0.9))
+
+  i//t('Change time to next day', moveTime(1*24*60*60 + 30))
+  //it('Should allow to send ETH in exchange of Tokens - fourth day', testExchange(5, EXPECT_FOR_ONE_ETH * 0.9 * 0.9 * 0.9))
+
+  //it('Change time to next day', moveTime(1*24*60*60 + 30))
+  //it('Should allow to send ETH in exchange of Tokens - fifth day', testExchange(5, EXPECT_FOR_ONE_ETH * 0.9 * 0.9 * 0.9 * 0.9))
+  
   it('Change time to end of crowdsale', moveTime(30*24*60*60 + 30))
 
 
