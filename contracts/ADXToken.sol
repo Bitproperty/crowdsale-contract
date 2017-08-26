@@ -16,20 +16,14 @@ contract ADXToken is VestedToken {
   string public symbol = "BTP";
   uint public decimals = 4;
 
-  //CONSTANTS
-  //Time limits
-  uint public constant STAGE_ONE_TIME_END = 24 hours; // first day bonus
-  uint public constant STAGE_TWO_TIME_END = 1 weeks; // first week bonus
-  uint public constant STAGE_THREE_TIME_END = 4 weeks;
-  
   // Multiplier for the decimals
   uint private constant DECIMALS = 10000;
 
   //Prices of ADX
-  uint public constant PRICE_STANDARD    = 900*DECIMALS; // ADX received per one ETH; MAX_SUPPLY / (valuation / ethPrice)
-  uint public constant PRICE_STAGE_ONE   = PRICE_STANDARD * 130/100; // 1ETH = 30% more ADX
-  uint public constant PRICE_STAGE_TWO   = PRICE_STANDARD * 115/100; // 1ETH = 15% more ADX
-  uint public constant PRICE_STAGE_THREE = PRICE_STANDARD;
+  uint public constant PRICE_STANDARD    = 1170*DECIMALS; // ADX received per one ETH; MAX_SUPPLY / (valuation / ethPrice)
+
+  uint public tokensForEthNow; // will be initialized to PRICE_STANDARD
+  uint public priceUpdated; // will be initialized in constructor
 
   //ADX Token Limits
   uint public constant ALLOC_TEAM =         16000000*DECIMALS; // team + advisors
@@ -126,6 +120,7 @@ contract ADXToken is VestedToken {
 
     hardcapInEth = _hardcapInEth;
 
+    // pre-buy; TODO: change
     preBuy1 = _prebuy1;
     preBuyPrice1 = _preBuyPrice1;
     preBuy2 = _prebuy2;
@@ -133,12 +128,16 @@ contract ADXToken is VestedToken {
     preBuy3 = _prebuy3;
     preBuyPrice3 = _preBuyPrice3;
 
+    // allocation; TODO: change
     balances[adexTeamAddress] += ALLOC_BOUNTIES;
     balances[adexTeamAddress] += ALLOC_WINGS;
 
     balances[ownerAddress] += ALLOC_TEAM;
 
     balances[ownerAddress] += ALLOC_CROWDSALE;
+
+    tokensForEthNow = PRICE_STANDARD;
+    priceUpdated = _publicStartTime;
   }
 
   // Transfer amount of tokens from sender account to recipient.
@@ -160,15 +159,15 @@ contract ADXToken is VestedToken {
 
   //constant function returns the current ADX price.
   function getPriceRate()
-      constant
+      internal
       returns (uint o_rate)
   {
-      uint delta = SafeMath.sub(now, publicStartTime);
-
-      if (delta > STAGE_TWO_TIME_END) return PRICE_STAGE_THREE;
-      if (delta > STAGE_ONE_TIME_END) return PRICE_STAGE_TWO;
-
-      return (PRICE_STAGE_ONE);
+      // pitfall: if nobody invests for 24 hours, it won't move with a 1 step for 24 hours rate
+      if (now-priceUpdated > 24 hours) {
+        tokensForEthNow = (tokensForEthNow * 9) / 10;
+        priceUpdated = now;
+      }
+      return tokensForEthNow;
   }
 
   // calculates wmount of ADX we get, given the wei and the rates we've defined per 1 eth
@@ -213,7 +212,7 @@ contract ADXToken is VestedToken {
 
     if (priceVested == 0) throw;
 
-    uint amount = processPurchase(PRICE_STAGE_ONE + priceVested, SafeMath.sub(PREBUY_PORTION_MAX, prebuyPortionTotal));
+    uint amount = processPurchase(PRICE_STANDARD + priceVested, SafeMath.sub(PREBUY_PORTION_MAX, prebuyPortionTotal));
     grantVestedTokens(msg.sender, calcAmount(msg.value, priceVested), 
       uint64(now), uint64(now) + 91 days, uint64(now) + 365 days, 
       false, false
