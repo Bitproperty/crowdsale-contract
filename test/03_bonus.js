@@ -2,6 +2,7 @@ var ADXToken = artifacts.require("./ADXToken.sol");
 var Promise = require('bluebird')
 var time = require('../helpers/time')
 
+var startPrice = 1170 * 1000;
 
 contract('ADXToken', function(accounts) {
 
@@ -82,50 +83,30 @@ contract('ADXToken', function(accounts) {
     }
   }
 
+  function moveTime(t) {
+    return () => {
+      return new Promise((resolve, reject) => {
+           web3.currentProvider.sendAsync({
+            jsonrpc: "2.0",
+            method: "evm_increaseTime",
+            params: [t],
+            id: new Date().getTime()
+          }, (err, result) => {
+            err ? reject(err) : resolve()
+          })
+      })
+    }
+  }
+
   it('Should allow to send ETH in exchange of Tokens - first day', testExchange(1, EXPECT_FOR_ONE_ETH))
-
-  it('Change time to first week bonus', () => {
-    return new Promise((resolve, reject) => {
-         web3.currentProvider.sendAsync({
-          jsonrpc: "2.0",
-          method: "evm_increaseTime",
-          params: [3*24*60*60 + 30],
-          id: new Date().getTime()
-        }, (err, result) => {
-          err ? reject(err) : resolve()
-        })
-    })
-  })
-
+  
+  it('Change time to first week bonus', moveTime(3*24*60*60 + 30))
   it('Should allow to send ETH in exchange of Tokens - first week', testExchange(2, EXPECT_FOR_ONE_ETH_WEEK))
-
-  it('Change time to first month', () => {
-    return new Promise((resolve, reject) => {
-         web3.currentProvider.sendAsync({
-          jsonrpc: "2.0",
-          method: "evm_increaseTime",
-          params: [7*24*60*60 + 30],
-          id: new Date().getTime()
-        }, (err, result) => {
-          err ? reject(err) : resolve()
-        })
-    })
-  })
-
+  
+  it('Change time to first month', moveTime(7*24*60*60 + 30))
   it('Should allow to send ETH in exchange of Tokens - regular price', testExchange(3, EXPECT_FOR_ONE_ETH_MONTH))
 
-  it('Change time to end of crowdsale', () => {
-    return new Promise((resolve, reject) => {
-         web3.currentProvider.sendAsync({
-          jsonrpc: "2.0",
-          method: "evm_increaseTime",
-          params: [30*24*60*60 + 30],
-          id: new Date().getTime()
-        }, (err, result) => {
-          err ? reject(err) : resolve()
-        })
-    })
-  })
+  it('Change time to end of crowdsale', moveTime(30*24*60*60 + 30))
 
 
 });
