@@ -106,7 +106,7 @@ contract('ADXToken', function(accounts) {
   it('Change time to next day', moveTime(1*24*60*60 + 30))
   it('Should allow to send ETH in exchange of Tokens - third day', testExchange(4, EXPECT_FOR_ONE_ETH * 0.9 * 0.9))
 
-  i//t('Change time to next day', moveTime(1*24*60*60 + 30))
+  //it('Change time to next day', moveTime(1*24*60*60 + 30))
   //it('Should allow to send ETH in exchange of Tokens - fourth day', testExchange(5, EXPECT_FOR_ONE_ETH * 0.9 * 0.9 * 0.9))
 
   //it('Change time to next day', moveTime(1*24*60*60 + 30))
