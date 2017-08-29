@@ -114,7 +114,7 @@ contract ADXToken is VestedToken {
     ownerAddress = msg.sender;
     publicStartTime = _publicStartTime;
     privateStartTime = _privateStartTime;
-    publicEndTime = _publicStartTime + 4 weeks;
+    publicEndTime = _publicStartTime + 30 days;
     multisigAddress = _multisig;
     adexTeamAddress = _adexTeam;
 
