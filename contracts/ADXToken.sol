@@ -163,11 +163,23 @@ contract ADXToken is VestedToken {
       returns (uint o_rate)
   {
       // pitfall: if nobody invests for 24 hours, it won't move with a 1 step for 24 hours rate
-      if (now-priceUpdated > 24 hours) {
-        tokensForEthNow = (tokensForEthNow * 9) / 10;
-        priceUpdated = now;
+      //if (now-priceUpdated > 24 hours) {
+      //   tokensForEthNow = (tokensForEthNow * 9) / 10;
+      //   priceUpdated = now;
+      //}
+
+      if (publicStartTime < now && publicEndTime > now) {
+        uint delta = SafeMath.div(SafeMath.sub(now, priceUpdated), 1 days);
+
+      if (delta > 0) {
+        for (uint256 i = 0; i < delta; i++)
+          tokensForEthNow = (tokensForEthNow * 9) / 10;
+
+        priceUpdated += delta * 1 days;
       }
-      return tokensForEthNow;
+    }
+
+    return tokensForEthNow;
   }
 
   // calculates wmount of ADX we get, given the wei and the rates we've defined per 1 eth
