@@ -214,24 +214,21 @@ contract('ADXToken', function(accounts) {
     //   uint64(now), uint64(now) + 91 days , uint64(now) + 365 days, 
     //   false, false
     
-  it('call grantVestedTokens()', () => {
-    var start;
-    var now = Math.floor(Date.now() / 1000);
-    return crowdsale.grantVestedTokens(
-      adexTeamAddr2, 1000, 
-      now, 1, now + 6 * 30 * 24 * 60 * 60,
-      false, false, { from: adexTeamAddr1 }
-    )
+  it('call grant6MVest()', () => {
+
+    //crowdsale.balanceOf(adexTeamAddr2).then(function(bal) { console.log(bal.toNumber()) })
+    
+    return crowdsale.grant6MVest(adexTeamAddr2, TEAM_TOKENS , { from: adexTeamAddr1 })
    .then(function() { 
-    return crowdsale.balanceOf(adexTeamAddr2)
+      return crowdsale.balanceOf(adexTeamAddr2)
    }).then(function(b) {
-    assert.equal(b.toNumber(), TEAM_TOKENS)
+      assert.equal(b.toNumber(), TEAM_TOKENS)
    })
   })
 
   // vested tokens
   it('vesting schedule - check cliff & vesting afterwards (advances time)', () => {
-    var recepient = web3.eth.accounts[6];
+    var recepient = web3.eth.accounts[6]
 
     var quarterDays = 45;
     var halfDays = 3 * 30;

@@ -220,6 +220,16 @@ contract ADXToken is VestedToken {
     Buy(msg.sender, amount);
   }
 
+  // Grant 6m vesting tokens, standard for the BTP token
+  function grant6MVest(address _recepient, uint _amount) 
+  {
+    grantVestedTokens(
+      _recepient, _amount,
+      uint64(now), uint64(now), uint64(now + 6 * 30 days), 
+      false, false // revokable, burns on revoke
+    );
+  }
+
   //May be used by owner of contract to halt crowdsale and no longer except ether.
   function toggleHalt(bool _halted)
     only_owner
