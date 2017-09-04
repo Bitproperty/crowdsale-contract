@@ -59,20 +59,20 @@ contract ADXToken is VestedToken {
   // MODIFIERS
   //Is currently in the period after the private start time and before the public start time.
   modifier is_pre_crowdfund_period() {
-    if (now >= publicStartTime || now < privateStartTime) throw;
+    require (! (now >= publicStartTime || now < privateStartTime));
     _;
   }
 
   //Is currently the crowdfund period
   modifier is_crowdfund_period() {
-    if (now < publicStartTime) throw;
-    if (isCrowdfundCompleted()) throw;
+    require(now >= publicStartTime);
+    require(!isCrowdfundCompleted());
     _;
   }
 
   // Is completed
   modifier is_crowdfund_completed() {
-    if (!isCrowdfundCompleted()) throw;
+    require(isCrowdfundCompleted());
     _;
   }
   function isCrowdfundCompleted() internal returns (bool) {
@@ -82,13 +82,13 @@ contract ADXToken is VestedToken {
 
   //May only be called by the owner address
   modifier only_owner() {
-    if (msg.sender != ownerAddress) throw;
+    require(msg.sender == ownerAddress);
     _;
   }
 
   //May only be called if the crowdfund has not been halted
   modifier is_not_halted() {
-    if (halted) throw;
+    require(!halted);
     _;
   }
 
@@ -130,7 +130,7 @@ contract ADXToken is VestedToken {
   {
     // no-op, allow even during crowdsale, in order to work around using grantVestedTokens() while in crowdsale
     //if (_to == msg.sender) return;
-    if (!isCrowdfundCompleted()) throw;
+    require(isCrowdfundCompleted());
     super.transfer(_to, _value);
   }
 
@@ -184,13 +184,14 @@ contract ADXToken is VestedToken {
   {
     o_amount = calcAmount(msg.value, _rate);
 
-    if (o_amount > _remaining) throw;
-    if (!multisigAddress.send(msg.value)) throw;
+    require(o_amount <= _remaining);
 
     balances[ownerAddress] = balances[ownerAddress].sub(o_amount);
     balances[msg.sender] = balances[msg.sender].add(o_amount);
 
     etherRaised += msg.value;
+
+    require(multisigAddress.send(msg.value));
   }
 
   //Special Function can only be called by pre-buy and only during the pre-crowdsale period.
@@ -199,7 +200,7 @@ contract ADXToken is VestedToken {
     is_pre_crowdfund_period
     is_not_halted
   {
-    if ( ! (msg.sender == preBuy1)) throw;
+    require(msg.sender == preBuy1);
   
     uint amount = processPurchase(PRICE_PREBUY, SafeMath.sub(ALLOC_PREBUY, prebuyBTPSold));
     prebuyBTPSold += amount;
@@ -241,6 +242,6 @@ contract ADXToken is VestedToken {
   function drain()
     only_owner
   {
-    if (!ownerAddress.send(this.balance)) throw;
+    require(ownerAddress.send(this.balance));
   }
 }
