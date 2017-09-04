@@ -19,16 +19,18 @@ contract ADXToken is VestedToken {
   // Multiplier for the decimals
   uint private constant DECIMALS = 1000;
 
-  //Prices of ADX
+  //Prices of BTP
   uint public constant PRICE_STANDARD    = 10000*DECIMALS; // BTP received per one ETH; MAX_SUPPLY / (valuation / ethPrice)
+
+  uint public constant PRICE_PREBUY = 13350 * DECIMALS; // price for pre-buy
 
   uint public tokensForEthNow; // will be initialized to PRICE_STANDARD
   uint public priceUpdated; // will be initialized in constructor
 
-  //ADX Token Limits
-  uint public constant ALLOC_TEAM =           882977242*DECIMALS; // team + advisors
+  // BTP Token Limits
+  uint public constant ALLOC_TEAM =           882977242*DECIMALS; // team + advisors + BTPCorp
   uint public constant ALLOC_CROWDSALE =     1000000000*DECIMALS;
-  uint public constant ALLOC_PREBUY =        1017022758*DECIMALS; // this is redundantly more than what will be pre-sold
+  uint public constant ALLOC_PREBUY =        1017022758*DECIMALS; // total allocated for the pre-buy
   
   //ASSIGNED IN INITIALIZATION
   //Start and end times
@@ -42,16 +44,12 @@ contract ADXToken is VestedToken {
   address public adexTeamAddress; // Address to which ALLOC_TEAM, ALLOC_BOUNTIES, ALLOC_WINGS is (ultimately) sent to.
   address public ownerAddress; // Address of the contract owner. Can halt the crowdsale.
   address public preBuy1; // Address used by pre-buy
-  address public preBuy2; // Address used by pre-buy
-  address public preBuy3; // Address used by pre-buy
-  uint public preBuyPrice1; // price for pre-buy
-  uint public preBuyPrice2; // price for pre-buy
-  uint public preBuyPrice3; // price for pre-buy
 
   //Running totals
   uint public etherRaised; // Total Ether raised.
-  uint public ADXSold; // Total ADX created
-  uint public prebuyADXSold; // Total of Tokens purchased by pre-buy. Not to exceed ALLOC_PREBUY
+
+  uint public BTPSold; // Not to exceed ALLOC_CROWDSALE
+  uint public prebuyBTPSold; // Not to exceed ALLOC_PREBUY
 
   uint public totalSupply =  2900000000*DECIMALS;
 
@@ -78,7 +76,7 @@ contract ADXToken is VestedToken {
     _;
   }
   function isCrowdfundCompleted() internal returns (bool) {
-    if (now > publicEndTime || ADXSold >= ALLOC_CROWDSALE || etherRaised >= hardcapInEth) return true;
+    if (now > publicEndTime || BTPSold >= ALLOC_CROWDSALE || etherRaised >= hardcapInEth) return true;
     return false;
   }
 
@@ -105,9 +103,7 @@ contract ADXToken is VestedToken {
     uint _publicStartTime,
     uint _privateStartTime,
     uint _hardcapInEth,
-    address _prebuy1, uint _preBuyPrice1,
-    address _prebuy2, uint _preBuyPrice2,
-    address _prebuy3, uint _preBuyPrice3
+    address _prebuy1
   ) {
     ownerAddress = msg.sender;
     publicStartTime = _publicStartTime;
@@ -118,17 +114,10 @@ contract ADXToken is VestedToken {
 
     hardcapInEth = _hardcapInEth;
 
-    // pre-buy; TODO: change
     preBuy1 = _prebuy1;
-    preBuyPrice1 = _preBuyPrice1;
-    preBuy2 = _prebuy2;
-    preBuyPrice2 = _preBuyPrice2;
-    preBuy3 = _prebuy3;
-    preBuyPrice3 = _preBuyPrice3;
 
-    // allocation; TODO: change
-    balances[adexTeamAddress] += ALLOC_PREBUY;
-    balances[ownerAddress] += ALLOC_TEAM;
+    balances[adexTeamAddress] += ALLOC_TEAM;
+    balances[ownerAddress] += ALLOC_PREBUY;
     balances[ownerAddress] += ALLOC_CROWDSALE;
 
     tokensForEthNow = PRICE_STANDARD;
@@ -139,7 +128,8 @@ contract ADXToken is VestedToken {
   // Only callable after the crowd fund is completed
   function transfer(address _to, uint _value)
   {
-    if (_to == msg.sender) return; // no-op, allow even during crowdsale, in order to work around using grantVestedTokens() while in crowdsale
+    // no-op, allow even during crowdsale, in order to work around using grantVestedTokens() while in crowdsale
+    //if (_to == msg.sender) return;
     if (!isCrowdfundCompleted()) throw;
     super.transfer(_to, _value);
   }
@@ -209,17 +199,10 @@ contract ADXToken is VestedToken {
     is_pre_crowdfund_period
     is_not_halted
   {
-    // Pre-buy participants would get the first-day price, as well as a bonus of vested tokens
-    uint priceVested = 0;
-
-    if (msg.sender == preBuy1) priceVested = preBuyPrice1;
-    if (msg.sender == preBuy2) priceVested = preBuyPrice2;
-    if (msg.sender == preBuy3) priceVested = preBuyPrice3;
-
-    if (priceVested == 0) throw;
-
-    uint amount = processPurchase(PRICE_STANDARD + priceVested, SafeMath.sub(ALLOC_PREBUY, prebuyADXSold));
-    prebuyADXSold += amount;
+    if ( ! (msg.sender == preBuy1)) throw;
+  
+    uint amount = processPurchase(PRICE_PREBUY, SafeMath.sub(ALLOC_PREBUY, prebuyBTPSold));
+    prebuyBTPSold += amount;
 
     PreBuy(amount);
   }
@@ -231,32 +214,10 @@ contract ADXToken is VestedToken {
     is_crowdfund_period
     is_not_halted
   {
-    uint amount = processPurchase(getPriceRate(), SafeMath.sub(ALLOC_CROWDSALE, ADXSold));
-    ADXSold += amount;
+    uint amount = processPurchase(getPriceRate(), SafeMath.sub(ALLOC_CROWDSALE, BTPSold));
+    BTPSold += amount;
 
     Buy(msg.sender, amount);
-  }
-
-  // To be called at the end of crowdfund period
-  // WARNING: transfer(), which is called by grantVestedTokens(), wants a minimum message length
-  function grantVested(address _adexTeamAddress, address _adexFundAddress)
-    is_crowdfund_completed
-    only_owner
-    is_not_halted
-  {
-    // Grant tokens pre-allocated for the team
-    grantVestedTokens(
-      _adexTeamAddress, ALLOC_TEAM,
-      uint64(now), uint64(now) + 91 days , uint64(now) + 365 days, 
-      false, false
-    );
-
-    // Grant tokens that remain after crowdsale to the AdEx fund, vested for 2 years
-    grantVestedTokens(
-      _adexFundAddress, balances[ownerAddress],
-      uint64(now), uint64(now) + 182 days , uint64(now) + 730 days, 
-      false, false
-    );
   }
 
   //May be used by owner of contract to halt crowdsale and no longer except ether.

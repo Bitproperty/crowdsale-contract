@@ -8,7 +8,7 @@ contract('ADXToken', function(accounts) {
 
   var crowdsale;
 
-  var EXPECT_FOR_ONE_ETH = 11700000; // 900*1.3*10000
+  var EXPECT_FOR_ONE_ETH = 10000*1000; // 10000*1000
 
   var ownerAddr = web3.eth.accounts[0];
   var adexTeamAddr = web3.eth.accounts[9];
@@ -32,9 +32,7 @@ contract('ADXToken', function(accounts) {
       startDate, // public sale start
       startDate-7*24*60*60, // private sale start
       web3.toWei(40, 'ether'), // ETH hard cap, in wei
-      web3.eth.accounts[0], 5047335,
-      web3.eth.accounts[1], 5047335, // TODO: change accordingly
-      web3.eth.accounts[2], 2340000
+      web3.eth.accounts[0]
     )
   }
 
