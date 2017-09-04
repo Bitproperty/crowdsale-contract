@@ -127,19 +127,21 @@ contract ADXToken is VestedToken {
   // Transfer amount of tokens from sender account to recipient.
   // Only callable after the crowd fund is completed
   function transfer(address _to, uint _value)
+    returns (bool)
   {
     // no-op, allow even during crowdsale, in order to work around using grantVestedTokens() while in crowdsale
     //if (_to == msg.sender) return;
     require(isCrowdfundCompleted());
-    super.transfer(_to, _value);
+    return super.transfer(_to, _value);
   }
 
   // Transfer amount of tokens from a specified address to a recipient.
   // Transfer amount of tokens from sender account to recipient.
   function transferFrom(address _from, address _to, uint _value)
     is_crowdfund_completed
+    returns (bool)
   {
-    super.transferFrom(_from, _to, _value);
+    return super.transferFrom(_from, _to, _value);
   }
 
   //constant function returns the current ADX price.
