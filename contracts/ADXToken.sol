@@ -14,23 +14,21 @@ contract ADXToken is VestedToken {
   //FIELDS
   string public name = "BitProperty";
   string public symbol = "BTP";
-  uint public decimals = 4;
+  uint public decimals = 3;
 
   // Multiplier for the decimals
-  uint private constant DECIMALS = 10000;
+  uint private constant DECIMALS = 1000;
 
   //Prices of ADX
-  uint public constant PRICE_STANDARD    = 1170*DECIMALS; // ADX received per one ETH; MAX_SUPPLY / (valuation / ethPrice)
+  uint public constant PRICE_STANDARD    = 10000*DECIMALS; // BTP received per one ETH; MAX_SUPPLY / (valuation / ethPrice)
 
   uint public tokensForEthNow; // will be initialized to PRICE_STANDARD
   uint public priceUpdated; // will be initialized in constructor
 
   //ADX Token Limits
-  uint public constant ALLOC_TEAM =         16000000*DECIMALS; // team + advisors
-  uint public constant ALLOC_BOUNTIES =      2000000*DECIMALS;
-  uint public constant ALLOC_WINGS =         2000000*DECIMALS;
-  uint public constant ALLOC_CROWDSALE =    80000000*DECIMALS;
-  uint public constant PREBUY_PORTION_MAX = 20000000*DECIMALS; // this is redundantly more than what will be pre-sold
+  uint public constant ALLOC_TEAM =           882977242*DECIMALS; // team + advisors
+  uint public constant ALLOC_CROWDSALE =     1000000000*DECIMALS;
+  uint public constant ALLOC_PREBUY =        1017022758*DECIMALS; // this is redundantly more than what will be pre-sold
   
   //ASSIGNED IN INITIALIZATION
   //Start and end times
@@ -53,9 +51,9 @@ contract ADXToken is VestedToken {
   //Running totals
   uint public etherRaised; // Total Ether raised.
   uint public ADXSold; // Total ADX created
-  uint public prebuyPortionTotal; // Total of Tokens purchased by pre-buy. Not to exceed PREBUY_PORTION_MAX.
+  uint public prebuyADXSold; // Total of Tokens purchased by pre-buy. Not to exceed ALLOC_PREBUY
 
-  uint public totalSupply = 100000000*DECIMALS;
+  uint public totalSupply =  2900000000*DECIMALS;
 
   //booleans
   bool public halted; // halts the crowd sale if true.
@@ -129,11 +127,8 @@ contract ADXToken is VestedToken {
     preBuyPrice3 = _preBuyPrice3;
 
     // allocation; TODO: change
-    balances[adexTeamAddress] += ALLOC_BOUNTIES;
-    balances[adexTeamAddress] += ALLOC_WINGS;
-
+    balances[adexTeamAddress] += ALLOC_PREBUY;
     balances[ownerAddress] += ALLOC_TEAM;
-
     balances[ownerAddress] += ALLOC_CROWDSALE;
 
     tokensForEthNow = PRICE_STANDARD;
@@ -205,7 +200,6 @@ contract ADXToken is VestedToken {
     balances[ownerAddress] = balances[ownerAddress].sub(o_amount);
     balances[msg.sender] = balances[msg.sender].add(o_amount);
 
-    ADXSold += o_amount;
     etherRaised += msg.value;
   }
 
@@ -224,12 +218,9 @@ contract ADXToken is VestedToken {
 
     if (priceVested == 0) throw;
 
-    uint amount = processPurchase(PRICE_STANDARD + priceVested, SafeMath.sub(PREBUY_PORTION_MAX, prebuyPortionTotal));
-    grantVestedTokens(msg.sender, calcAmount(msg.value, priceVested), 
-      uint64(now), uint64(now) + 91 days, uint64(now) + 365 days, 
-      false, false
-    );
-    prebuyPortionTotal += amount;
+    uint amount = processPurchase(PRICE_STANDARD + priceVested, SafeMath.sub(ALLOC_PREBUY, prebuyADXSold));
+    prebuyADXSold += amount;
+
     PreBuy(amount);
   }
 
@@ -241,6 +232,8 @@ contract ADXToken is VestedToken {
     is_not_halted
   {
     uint amount = processPurchase(getPriceRate(), SafeMath.sub(ALLOC_CROWDSALE, ADXSold));
+    ADXSold += amount;
+
     Buy(msg.sender, amount);
   }
 
