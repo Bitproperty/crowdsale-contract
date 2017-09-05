@@ -1,8 +1,8 @@
-var ADXToken = artifacts.require("./ADXToken.sol");
+var BTPToken = artifacts.require("./BTPToken.sol");
 var Promise = require('bluebird')
 var time = require('../helpers/time')
 
-contract('ADXToken', function(accounts) {
+contract('BTPToken', function(accounts) {
 
   var crowdsale;
 
@@ -28,7 +28,7 @@ contract('ADXToken', function(accounts) {
     return time.blockchainTime(web3)
     .then(function(startDate) {
 
-      return ADXToken.new(
+      return BTPToken.new(
         ownerAddr, // multisig
         adexTeamAddr1, // team, where 30% tokens will be put 
         startDate+7*24*60*60, // public sale start

@@ -1,10 +1,10 @@
-var ADXToken = artifacts.require("./ADXToken.sol");
+var BTPToken = artifacts.require("./BTPToken.sol");
 var Promise = require('bluebird')
 var time = require('../helpers/time')
 
 var startPrice = 1170 * 10000;
 
-contract('ADXToken', function(accounts) {
+contract('BTPToken - prices', function(accounts) {
 
   var crowdsale;
 
@@ -26,7 +26,7 @@ contract('ADXToken', function(accounts) {
   }
 
   var newSC = function(startDate) {
-    return ADXToken.new(
+    return BTPToken.new(
       ownerAddr, // multisig
       adexTeamAddr, // team, whre 2% wings and 2% bounty will be received
       startDate, // public sale start

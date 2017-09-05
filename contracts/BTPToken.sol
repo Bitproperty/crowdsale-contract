@@ -1,16 +1,10 @@
 pragma solidity ^0.4.11;
 
-// QUESTIONS FOR AUDITORS:
-// - Considering we inherit from VestedToken, how much does that hit at our gas price?
-// - Ensure max supply is 100,000,000
-// - Ensure that even if not totalSupply is sold, tokens would still be transferrable after (we will up to totalSupply by creating adEx tokens)
-
-// vesting: 365 days, 365 days / 4 vesting
 
 import "../zeppelin-solidity/contracts/math/SafeMath.sol";
 import "../zeppelin-solidity/contracts/token/VestedToken.sol";
 
-contract ADXToken is VestedToken {
+contract BTPToken is VestedToken {
   //FIELDS
   string public name = "BitProperty";
   string public symbol = "BTP";
@@ -97,7 +91,7 @@ contract ADXToken is VestedToken {
   event Buy(address indexed _recipient, uint _amount);
 
   // Initialization contract assigns address of crowdfund contract and end time.
-  function ADXToken(
+  function BTPToken(
     address _multisig,
     address _adexTeam,
     uint _publicStartTime,
