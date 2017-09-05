@@ -184,8 +184,10 @@ contract('BTPToken', function(accounts) {
 
   it("should track raised eth", function() {
     return crowdsale.etherRaised.call()
-    .then(function(eth) {        
-        assert.equal(eth.valueOf(), web3.toWei(2.5+3, 'ether')); // preBuy eth + 3 eth 
+    .then(function(eth) {
+	// behaviour changed to not count pre-buy money toward etherRaised
+        assert.equal(eth.valueOf(), web3.toWei(3, 'ether')); // 3 eth 
+        //assert.equal(eth.valueOf(), web3.toWei(2.5+3, 'ether')); // preBuy eth + 3 eth 
     })
   });
 

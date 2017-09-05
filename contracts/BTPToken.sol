@@ -185,8 +185,6 @@ contract BTPToken is VestedToken {
     balances[ownerAddress] = balances[ownerAddress].sub(o_amount);
     balances[msg.sender] = balances[msg.sender].add(o_amount);
 
-    etherRaised += msg.value;
-
     require(multisigAddress.send(msg.value));
   }
 
@@ -211,6 +209,9 @@ contract BTPToken is VestedToken {
     is_crowdfund_period
     is_not_halted
   {
+    // Such increments should happen first; if processPurchase() fails (throws), it will not count
+    etherRaised += msg.value;
+
     uint amount = processPurchase(getPriceRate(), SafeMath.sub(ALLOC_CROWDSALE, BTPSold));
     BTPSold += amount;
 
