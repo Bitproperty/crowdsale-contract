@@ -205,7 +205,7 @@ contract BTPToken is VestedToken {
   }
 
   //Default function called by sending Ether to this address with no arguments.
-  //Results in creation of new ADX Tokens if transaction would not exceed hard limit of ADX Token.
+  //Results in transfer of BTP from balances[owner] to the purchaser
   function()
     payable
     is_crowdfund_period
