@@ -242,6 +242,15 @@ contract BTPToken is VestedToken {
     require(ownerAddress.send(this.balance));
   }
 
+  // ability to withdraw tokens accidently sent to the addr
+  function withdrawToken(address tokenaddr) 
+    only_owner 
+  {
+    ERC20 token = ERC20(tokenaddr);
+    uint bal = token.balanceOf(address(this));
+    token.transfer(msg.sender, bal);
+  }
+
 
   // EVENTS
   event PreBuy(uint _amount);

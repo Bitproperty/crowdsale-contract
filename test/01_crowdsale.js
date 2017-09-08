@@ -207,6 +207,29 @@ contract('BTPToken', function(accounts) {
     })
   })
 
+
+  // tokens transferable after end of crowdsale
+  it('Should allow to unlock accidently sent tokens', () => {
+    return crowdsale.transfer(crowdsale.address, 50, {
+      from: web3.eth.accounts[5]
+    }).then(() => {
+       return crowdsale.balanceOf.call(crowdsale.address)
+    })
+    .then(function(bal) {
+      assert.equal(bal.valueOf(), 50)
+
+      // TODO: should we test whether withdrawToken can't be called by non owners
+      return crowdsale.withdrawToken(crowdsale.address, { from: ownerAddr })
+    })
+    .then(function() {
+      return crowdsale.balanceOf.call(crowdsale.address)
+    })
+    .then(function(bal) {
+      assert.equal(bal.valueOf(), 0)
+    })
+  })
+
+
   // should allow for calling grantVested()
   var TEAM_TOKENS = 10*1000*1000 * 1000;
 
