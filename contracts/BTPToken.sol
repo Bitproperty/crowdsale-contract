@@ -4,7 +4,7 @@ import "../zeppelin-solidity/contracts/math/SafeMath.sol";
 import "../zeppelin-solidity/contracts/token/VestedToken.sol";
 
 contract BTPToken is VestedToken {
-  //FIELDS
+  // FIELDS
   string public name = "BitProperty";
   string public symbol = "BTP";
   uint public decimals = 3;
@@ -54,7 +54,8 @@ contract BTPToken is VestedToken {
   // MODIFIERS
   //Is currently in the period after the private start time and before the public start time.
   modifier is_pre_crowdfund_period() {
-    require (! (now >= publicStartTime || now < privateStartTime));
+    require(now >= privateStartTime);
+    require(now < publicStartTime);
     _;
   }
 
@@ -71,7 +72,9 @@ contract BTPToken is VestedToken {
     _;
   }
   function isCrowdfundCompleted() internal returns (bool) {
-    if (now > publicEndTime || BTPSold >= ALLOC_CROWDSALE || etherRaised >= hardcapInEth) return true;
+    if (now > publicEndTime) return true; // out of time
+    if (BTPSold >= ALLOC_CROWDSALE) return true; // out of tokens
+    if (etherRaised >= hardcapInEth) return true; // hard cap reached
     return false;
   }
 
@@ -96,6 +99,11 @@ contract BTPToken is VestedToken {
     uint _hardcapInEth,
     address _prebuy1
   ) {
+    // sanity
+    require(_publicStartTime > _privateStartTime);
+    require(_multisig != 0);
+    require(_team != 0);
+
     ownerAddress = msg.sender;
     publicStartTime = _publicStartTime;
     privateStartTime = _privateStartTime;
