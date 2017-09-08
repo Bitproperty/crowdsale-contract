@@ -32,7 +32,7 @@ contract BTPToken is VestedToken {
   //ASSIGNED IN INITIALIZATION
   //Start and end times
   uint public publicStartTime; // Time in seconds public crowd fund starts.
-  uint public privateStartTime; // Time in seconds when pre-buy can purchase up to 31250 ETH worth of ADX;
+  uint public privateStartTime; // Time in seconds when pre-buy can purchase up to ALLOC_PREBUY tokens
   uint public publicEndTime; // Time in seconds crowdsale ends
   uint public hardcapInEth;
 
@@ -84,13 +84,13 @@ contract BTPToken is VestedToken {
     _;
   }
 
-  //May only be called if the crowdfund has not been halted
+  //May only be called if the TGE has not been halted
   modifier is_not_halted() {
     require(!halted);
     _;
   }
 
-  // Initialization contract assigns address of crowdfund contract and end time.
+  // Initialization contract assigns address of token contract and end time.
   function BTPToken(
     address _multisig,
     address _team,
@@ -126,8 +126,9 @@ contract BTPToken is VestedToken {
     priceUpdated = _publicStartTime;
   }
 
-  // Transfer amount of tokens from sender account to recipient.
-  // Only callable after the crowd fund is completed
+  // transfer() and transferFrom() are overriden so we can limit them to is_crowdfund_completed conditions
+
+  // Transfer amount of tokens from sender account to recipient
   function transfer(address _to, uint _value)
     returns (bool)
   {
@@ -137,7 +138,6 @@ contract BTPToken is VestedToken {
     return super.transfer(_to, _value);
   }
 
-  // Transfer amount of tokens from a specified address to a recipient.
   // Transfer amount of tokens from sender account to recipient.
   function transferFrom(address _from, address _to, uint _value)
     is_crowdfund_completed
@@ -146,7 +146,7 @@ contract BTPToken is VestedToken {
     return super.transferFrom(_from, _to, _value);
   }
 
-  //constant function returns the current ADX price.
+  //constant function returns the current token price.
   function getPriceRate()
       internal
       returns (uint o_rate)
@@ -171,7 +171,7 @@ contract BTPToken is VestedToken {
     return tokensForEthNow;
   }
 
-  // calculates wmount of ADX we get, given the wei and the rates we've defined per 1 eth
+  // calculates wmount of tokens we get, given the wei and the rates we've defined per 1 eth
   function calcAmount(uint _wei, uint _rate) 
     constant
     returns (uint) 
@@ -181,7 +181,7 @@ contract BTPToken is VestedToken {
   
   // Given the rate of a purchase and the remaining tokens in this tranche, it
   // will throw if the sale would take it past the limit of the tranche.
-  // Returns `amount` in scope as the number of ADX tokens that it will purchase.
+  // Returns `amount` in scope as the number of tokens that it will purchase.
   function processPurchase(uint _rate, uint _remaining)
     internal
     returns (uint o_amount)
