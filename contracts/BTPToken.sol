@@ -1,6 +1,5 @@
 pragma solidity ^0.4.11;
 
-
 import "../zeppelin-solidity/contracts/math/SafeMath.sol";
 import "../zeppelin-solidity/contracts/token/VestedToken.sol";
 
@@ -14,9 +13,9 @@ contract BTPToken is VestedToken {
   uint private constant DECIMALS = 1000;
 
   //Prices of BTP
-  uint public constant PRICE_STANDARD    = 10000*DECIMALS; // BTP received per one ETH; MAX_SUPPLY / (valuation / ethPrice)
+  uint public constant PRICE_STANDARD     = 10000*DECIMALS; // BTP received per one ETH; MAX_SUPPLY / (valuation / ethPrice)
 
-  uint public constant PRICE_PREBUY = 13350 * DECIMALS; // price for pre-buy
+  uint public constant PRICE_PREBUY       = 13350*DECIMALS; // price for pre-buy
 
   uint public tokensForEthNow; // will be initialized to PRICE_STANDARD
   uint public priceUpdated; // will be initialized in constructor
@@ -25,7 +24,11 @@ contract BTPToken is VestedToken {
   uint public constant ALLOC_TEAM =           882977242*DECIMALS; // team + advisors + BTPCorp
   uint public constant ALLOC_CROWDSALE =     1000000000*DECIMALS;
   uint public constant ALLOC_PREBUY =        1017022758*DECIMALS; // total allocated for the pre-buy
-  
+  // sum should be 2900000000
+
+  // Public, ERC20
+  uint public totalSupply =  2900000000*DECIMALS;
+
   //ASSIGNED IN INITIALIZATION
   //Start and end times
   uint public publicStartTime; // Time in seconds public crowd fund starts.
@@ -35,7 +38,7 @@ contract BTPToken is VestedToken {
 
   //Special Addresses
   address public multisigAddress; // Address to which all ether flows.
-  address public adexTeamAddress; // Address to which ALLOC_TEAM, ALLOC_BOUNTIES, ALLOC_WINGS is (ultimately) sent to.
+  address public teamAddress; // Address to which team tokens are allocated to
   address public ownerAddress; // Address of the contract owner. Can halt the crowdsale.
   address public preBuy1; // Address used by pre-buy
 
@@ -44,8 +47,6 @@ contract BTPToken is VestedToken {
 
   uint public BTPSold; // Not to exceed ALLOC_CROWDSALE
   uint public prebuyBTPSold; // Not to exceed ALLOC_PREBUY
-
-  uint public totalSupply =  2900000000*DECIMALS;
 
   //booleans
   bool public halted; // halts the crowd sale if true.
@@ -86,14 +87,10 @@ contract BTPToken is VestedToken {
     _;
   }
 
-  // EVENTS
-  event PreBuy(uint _amount);
-  event Buy(address indexed _recipient, uint _amount);
-
   // Initialization contract assigns address of crowdfund contract and end time.
   function BTPToken(
     address _multisig,
-    address _adexTeam,
+    address _team,
     uint _publicStartTime,
     uint _privateStartTime,
     uint _hardcapInEth,
@@ -104,13 +101,16 @@ contract BTPToken is VestedToken {
     privateStartTime = _privateStartTime;
     publicEndTime = _publicStartTime + 30 days;
     multisigAddress = _multisig;
-    adexTeamAddress = _adexTeam;
+    teamAddress = _team;
 
     hardcapInEth = _hardcapInEth;
 
     preBuy1 = _prebuy1;
 
-    balances[adexTeamAddress] += ALLOC_TEAM;
+    balances[teamAddress] += ALLOC_TEAM;
+
+    // All the tokens up for purchase will be allocated to the addr of the owner
+    // when sold, they will be deducated (transferred) from the ownerADdress
     balances[ownerAddress] += ALLOC_PREBUY;
     balances[ownerAddress] += ALLOC_CROWDSALE;
 
@@ -149,8 +149,8 @@ contract BTPToken is VestedToken {
       //   priceUpdated = now;
       //}
 
-      if (publicStartTime < now && publicEndTime > now) {
-        uint delta = SafeMath.div(SafeMath.sub(now, priceUpdated), 1 days);
+    if (publicStartTime < now && publicEndTime > now) {
+      uint delta = SafeMath.div(SafeMath.sub(now, priceUpdated), 1 days);
 
       if (delta > 0) {
         for (uint256 i = 0; i < delta; i++)
@@ -241,4 +241,9 @@ contract BTPToken is VestedToken {
   {
     require(ownerAddress.send(this.balance));
   }
+
+
+  // EVENTS
+  event PreBuy(uint _amount);
+  event Buy(address indexed _recipient, uint _amount);
 }
