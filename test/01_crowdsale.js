@@ -255,11 +255,12 @@ contract('BTPToken', function(accounts) {
   it('vesting schedule - check cliff & vesting afterwards (advances time)', () => {
     var recepient = web3.eth.accounts[6]
 
-    var quarterDays = 45;
-    var halfDays = 3 * 30;
-    var totalDays = 6 * 30;
-    var quarterAmount = Math.round(quarterDays/totalDays * TEAM_TOKENS); // 45 days worth of 10m tokens
-    var halfAmount = Math.round(halfDays/totalDays * TEAM_TOKENS); // 90 days worth of 10m tokens
+
+    var totalDays = 182;
+    var quarterDays = totalDays / 4;
+    var halfDays = totalDays / 2;
+    var quarterAmount = Math.round(quarterDays/totalDays * TEAM_TOKENS); // quarter days worth of 10m tokens
+    var halfAmount = Math.round(halfDays/totalDays * TEAM_TOKENS); // half days worth of 10m tokens
 
     return crowdsale.transfer(recepient, quarterAmount, { from: adexTeamAddr2 })
     .then(function() { throw new Error('should not be here - allowed to transfer - 1') })

@@ -231,7 +231,7 @@ contract BTPToken is VestedToken {
   {
     grantVestedTokens(
       _recepient, _amount,
-      uint64(now), uint64(now), uint64(now + 6 * 30 days), 
+      uint64(now), uint64(now), uint64(now + 182 days), 
       false, false // revokable, burns on revoke
     );
   }
