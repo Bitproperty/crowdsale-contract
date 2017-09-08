@@ -74,7 +74,7 @@ contract('BTPToken', function(accounts) {
   it("pre-buy state: cannot send ETH in exchange for tokens from non-prebuy acc", function() {
     return new Promise((resolve, reject) => {
         crowdsale.preBuy({
-          from: web3.eth.accounts[7],
+          from: adexTeamAddr1,
           value: web3.toWei(1, 'ether'),
           gas: 130000
         }).catch((err) => {
@@ -239,7 +239,7 @@ contract('BTPToken', function(accounts) {
     //   uint64(now), uint64(now) + 91 days , uint64(now) + 365 days, 
     //   false, false
     
-  it('call grant6MVest()', () => {
+  it('call grant6MVest() from team pool', () => {
 
     //crowdsale.balanceOf(adexTeamAddr2).then(function(bal) { console.log(bal.toNumber()) })
     
@@ -248,6 +248,16 @@ contract('BTPToken', function(accounts) {
       return crowdsale.balanceOf(adexTeamAddr2)
    }).then(function(b) {
       assert.equal(b.toNumber(), TEAM_TOKENS)
+   })
+  })
+
+    
+  it('call grant6MVest() from owner, we should have remaining tokens', () => {    
+    return crowdsale.grant6MVest(web3.eth.accounts[9], 10000*1000 , { from: ownerAddr })
+   .then(function() { 
+      return crowdsale.balanceOf(web3.eth.accounts[9])
+   }).then(function(b) {
+      assert.equal(b.toNumber(), 10000*1000)
    })
   })
 
