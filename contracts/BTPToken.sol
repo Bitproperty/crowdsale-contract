@@ -217,8 +217,6 @@ contract BTPToken is VestedToken {
     // give out the token
     balances[ownerAddress] = balances[ownerAddress].sub(o_amount);
     balances[msg.sender] = balances[msg.sender].add(o_amount);
-
-    require(multisigAddress.send(msg.value));
   }
 
   //Special Function can only be called by pre-buy and only during the pre-crowdsale period.
@@ -246,6 +244,15 @@ contract BTPToken is VestedToken {
     BTPSold += amount;
 
     Buy(msg.sender, amount);
+  }
+
+  // Get raised to multisig
+  function getFunds() 
+    only_owner
+    is_crowdfund_completed
+    is_minimum_reached
+  {
+    require(multisigAddress.send(this.balance));
   }
 
   // Re-funds

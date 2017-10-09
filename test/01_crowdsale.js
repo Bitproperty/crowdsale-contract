@@ -194,6 +194,10 @@ contract('BTPToken', function(accounts) {
     })
   });
 
+  it("Should allow to get funds to multisig", function() {
+    return crowdsale.getFunds({ from: ownerAddr })
+  })
+
   // tokens transferable after end of crowdsale
   it('Should allow to transfer tokens after end of crowdsale', () => {
     return crowdsale.transfer(web3.eth.accounts[4], 50, {
