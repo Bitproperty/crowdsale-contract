@@ -1,0 +1,5 @@
+* ether is on the multisig, not on the contract
+
+* all the planned tests
+
+* test whether the eth balance of the user is raised
