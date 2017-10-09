@@ -79,6 +79,12 @@ contract BTPToken is VestedToken {
     return false;
   }
 
+  // Is minimum reached
+  modifier is_minimum_reached() {
+    require(etherRaised >= minimumInEth);
+    _;
+  }
+
   //May only be called by the owner address
   modifier only_owner() {
     require(msg.sender == ownerAddress);
@@ -135,6 +141,7 @@ contract BTPToken is VestedToken {
   // Transfer amount of tokens from sender account to recipient
   function transfer(address _to, uint _value)
     is_crowdfund_completed
+    is_minimum_reached
     returns (bool)
   {
     return super.transfer(_to, _value);
@@ -143,6 +150,7 @@ contract BTPToken is VestedToken {
   // Transfer amount of tokens from sender account to recipient.
   function transferFrom(address _from, address _to, uint _value)
     is_crowdfund_completed
+    is_minimum_reached
     returns (bool)
   {
     return super.transferFrom(_from, _to, _value);
