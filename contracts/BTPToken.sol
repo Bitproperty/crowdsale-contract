@@ -37,6 +37,9 @@ contract BTPToken is VestedToken {
   uint public hardcapInEth;
   uint public minimumInEth; // if raised is below that amount and time is expired, let people get their invested eth back
 
+  // Used for re-funds
+  mapping (address => uint) etherPerSender;
+
   //Special Addresses
   address public multisigAddress; // Address to which all ether flows.
   address public teamAddress; // Address to which team tokens are allocated to
@@ -82,6 +85,11 @@ contract BTPToken is VestedToken {
   // Is minimum reached
   modifier is_minimum_reached() {
     require(etherRaised >= minimumInEth);
+    _;
+  }
+
+  modifier is_minimum_not_reached() {
+    require(etherRaised < minimumInEth);
     _;
   }
 
@@ -196,10 +204,17 @@ contract BTPToken is VestedToken {
     internal
     returns (uint o_amount)
   {
+    // Such increments should happen first; if this function fails (throws), it will not count
+    etherRaised += msg.value;
+
     o_amount = calcAmount(msg.value, _rate);
 
     require(o_amount <= _remaining);
 
+    // used in an event of a re-fund
+    etherPerSender[msg.sender] = msg.value;
+
+    // give out the token
     balances[ownerAddress] = balances[ownerAddress].sub(o_amount);
     balances[msg.sender] = balances[msg.sender].add(o_amount);
 
@@ -227,13 +242,23 @@ contract BTPToken is VestedToken {
     is_crowdfund_period
     is_not_halted
   {
-    // Such increments should happen first; if processPurchase() fails (throws), it will not count
-    etherRaised += msg.value;
-
     uint amount = processPurchase(getPriceRate(), SafeMath.sub(ALLOC_CROWDSALE, BTPSold));
     BTPSold += amount;
 
     Buy(msg.sender, amount);
+  }
+
+  // Re-funds
+  function getRefund()
+    is_crowdfund_completed
+    is_minimum_not_reached
+  {
+    uint amount = etherPerSender[msg.sender];
+    require(amount > 0);
+
+    etherPerSender[msg.sender] = 0;
+
+    require(msg.sender.send(amount));
   }
 
   // Grant 6m vesting tokens, standard for the BTP token
