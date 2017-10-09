@@ -34,6 +34,7 @@ contract('BTPToken', function(accounts) {
         startDate+7*24*60*60, // public sale start
         startDate, // private sale start
         web3.toWei(100000, 'ether'), // ETH hard cap, in wei
+        web3.toWei( 50000, 'ether'), // minimum
         web3.eth.accounts[1]
       )
     }).then(function(_crowdsale) {

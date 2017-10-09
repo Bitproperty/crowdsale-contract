@@ -35,6 +35,7 @@ contract BTPToken is VestedToken {
   uint public privateStartTime; // Time in seconds when pre-buy can purchase up to ALLOC_PREBUY tokens
   uint public publicEndTime; // Time in seconds crowdsale ends
   uint public hardcapInEth;
+  uint public minimumInEth; // if raised is below that amount and time is expired, let people get their invested eth back
 
   //Special Addresses
   address public multisigAddress; // Address to which all ether flows.
@@ -97,12 +98,14 @@ contract BTPToken is VestedToken {
     uint _publicStartTime,
     uint _privateStartTime,
     uint _hardcapInEth,
+    uint _minimumInEth,
     address _prebuy1
   ) {
     // sanity
     require(_publicStartTime > _privateStartTime);
     require(_multisig != 0);
     require(_team != 0);
+    require(_minimumInEth < _hardcapInEth);
 
     ownerAddress = msg.sender;
     publicStartTime = _publicStartTime;
@@ -112,6 +115,7 @@ contract BTPToken is VestedToken {
     teamAddress = _team;
 
     hardcapInEth = _hardcapInEth;
+    minimumInEth = _minimumInEth;
 
     preBuy1 = _prebuy1;
 
@@ -126,7 +130,7 @@ contract BTPToken is VestedToken {
     priceUpdated = _publicStartTime;
   }
 
-  // transfer() and transferFrom() are overriden so we can limit them to is_crowdfund_completed conditions
+  // transfer() and transferFrom() are overriden so we can limit them to is_crowdfund_completed+is_minimum_reached conditions
 
   // Transfer amount of tokens from sender account to recipient
   function transfer(address _to, uint _value)
