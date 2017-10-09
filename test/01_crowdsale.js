@@ -195,7 +195,26 @@ contract('BTPToken', function(accounts) {
   });
 
   it("Should allow to get funds to multisig", function() {
-    return crowdsale.getFunds({ from: ownerAddr })
+    var startBal = 0
+    var gasUsed = 0
+
+    // we don't really care about etherRaised, just using it to chain
+    return crowdsale.etherRaised.call()
+    .then(function() { 
+      return web3.eth.getBalance(ownerAddr)
+    })
+    .then(function(st) {
+      startBal = st.toNumber()
+      return crowdsale.getFunds({ from: ownerAddr, gasPrice: web3.toHex(10000000000)  })
+
+    })
+    .then(function(res) {
+      gasUsed += res.receipt.cumulativeGasUsed
+      return web3.eth.getBalance(ownerAddr)
+    })
+    .then(function(res) {
+      assert.equal(res.toNumber() + (gasUsed * 10000000000), startBal + parseInt(web3.toWei(2.5+3, 'ether')))
+    })
   })
 
   // tokens transferable after end of crowdsale

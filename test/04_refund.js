@@ -134,12 +134,26 @@ contract('BTPToken - refund', function(accounts) {
   // TODO should not be allowed to get a re-fund if it's another account
   // TODO: in the hard cap or crowdsale case: we should NOT be able to get a re-fund if minimum is 
 
-  // TODO: test if the user gets the eth
   it('Should be allowed to get a re-fund', () => {
-    return crowdsale.getRefund({ from: web3.eth.accounts[4] })
-    // .then(function() {
-    //   return crowdsale.balanceOf(web3.eth.accounts[4])
-    // })
+    var startBal = 0
+    var gasUsed = 0 
+
+    // we don't really care about etherRaised, just using it to chain
+    return crowdsale.etherRaised.call()
+    .then(function() { 
+      return web3.eth.getBalance(web3.eth.accounts[4])
+    })
+    .then(function(st) {
+      startBal = st.toNumber()
+      return crowdsale.getRefund({ from: web3.eth.accounts[4], gasPrice: web3.toHex(10000000000) })
+    })
+    .then(function(res) {
+       gasUsed += res.receipt.cumulativeGasUsed
+       return web3.eth.getBalance(web3.eth.accounts[4])
+    })
+    .then(function(bal) {
+      assert.equal(bal.toNumber() + (gasUsed * 10000000000), startBal + parseInt(web3.toWei(0.1, 'ether')))
+    })
   })
 
 });
