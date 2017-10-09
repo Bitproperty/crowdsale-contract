@@ -134,11 +134,9 @@ contract BTPToken is VestedToken {
 
   // Transfer amount of tokens from sender account to recipient
   function transfer(address _to, uint _value)
+    is_crowdfund_completed
     returns (bool)
   {
-    // no-op, allow even during crowdsale, in order to work around using grantVestedTokens() while in crowdsale
-    //if (_to == msg.sender) return;
-    require(isCrowdfundCompleted());
     return super.transfer(_to, _value);
   }
 
