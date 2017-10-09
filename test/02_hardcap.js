@@ -51,7 +51,7 @@ contract('BTPToken - hardcap', function(accounts) {
   it("should start with 0 eth", function() {
     return crowdsale.etherRaised.call()
     .then(function(eth) {
-      assert.equal(eth.valueOf(), 0);
+      assert.equal(eth.toNumber(), 0);
     })
   });
 
@@ -69,7 +69,7 @@ contract('BTPToken - hardcap', function(accounts) {
           if (err) reject(err) 
           
           crowdsale.balanceOf(participiant.account).then(function(res) {
-            assert.equal(res.valueOf(), EXPECT_FOR_ONE_ETH);
+            assert.equal(res.toNumber(), EXPECT_FOR_ONE_ETH);
             resolve()
           }).catch(reject)
 
@@ -90,8 +90,8 @@ contract('BTPToken - hardcap', function(accounts) {
         crowdsale.balanceOf.call(web3.eth.accounts[4]),
         crowdsale.balanceOf.call(web3.eth.accounts[5]),
         (toBalance, fromBalance) => {
-            assert.equal(toBalance.valueOf(), EXPECT_FOR_ONE_ETH)
-            assert.equal(fromBalance.valueOf(), EXPECT_FOR_ONE_ETH)
+            assert.equal(toBalance.toNumber(), EXPECT_FOR_ONE_ETH)
+            assert.equal(fromBalance.toNumber(), EXPECT_FOR_ONE_ETH)
 
         }
       )
@@ -134,8 +134,8 @@ contract('BTPToken - hardcap', function(accounts) {
         crowdsale.balanceOf.call(web3.eth.accounts[4]),
         crowdsale.balanceOf.call(web3.eth.accounts[5]),
         (toBalance, fromBalance) => {
-            assert.equal(toBalance.valueOf(), EXPECT_FOR_ONE_ETH+50)
-            assert.equal(fromBalance.valueOf(), EXPECT_FOR_ONE_ETH-50)
+            assert.equal(toBalance.toNumber(), EXPECT_FOR_ONE_ETH+50)
+            assert.equal(fromBalance.toNumber(), EXPECT_FOR_ONE_ETH-50)
         }
       )
     })

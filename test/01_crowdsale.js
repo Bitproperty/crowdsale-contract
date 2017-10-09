@@ -45,7 +45,7 @@ contract('BTPToken', function(accounts) {
   it("should start with 0 eth", function() {
     return crowdsale.etherRaised.call()
     .then(function(eth) {
-        assert.equal(eth.valueOf(), 0);
+        assert.equal(eth.toNumber(), 0);
     })
   });
 
@@ -53,7 +53,7 @@ contract('BTPToken', function(accounts) {
   it("totalSupply is right", function() {
     return crowdsale.totalSupply.call()
     .then(function(sup) {
-        assert.equal(sup.valueOf(), TOTAL * 1000);
+        assert.equal(sup.toNumber(), TOTAL * 1000);
     })
   });
 
@@ -139,7 +139,7 @@ contract('BTPToken', function(accounts) {
           if (err) reject(err) 
           
           crowdsale.balanceOf(participiant.account).then(function(res) {
-            assert.equal(res.valueOf(), EXPECT_FOR_ONE_ETH);
+            assert.equal(res.toNumber(), EXPECT_FOR_ONE_ETH);
             resolve()
           })
 
@@ -162,8 +162,8 @@ contract('BTPToken', function(accounts) {
         crowdsale.balanceOf.call(web3.eth.accounts[4]),
         crowdsale.balanceOf.call(web3.eth.accounts[5]),
         (toBalance, fromBalance) => {
-            assert.equal(toBalance.valueOf(), EXPECT_FOR_ONE_ETH)
-            assert.equal(fromBalance.valueOf(), EXPECT_FOR_ONE_ETH)
+            assert.equal(toBalance.toNumber(), EXPECT_FOR_ONE_ETH)
+            assert.equal(fromBalance.toNumber(), EXPECT_FOR_ONE_ETH)
 
         }
       )
@@ -187,10 +187,10 @@ contract('BTPToken', function(accounts) {
     return crowdsale.etherRaised.call()
     .then(function(eth) {
         // behaviour WAS changed to not count pre-buy money toward etherRaised
-        //assert.equal(eth.valueOf(), web3.toWei(3, 'ether')); // 3 eth 
+        //assert.equal(eth.toNumber(), web3.toWei(3, 'ether')); // 3 eth 
 
         // and then changed back again to count it towards
-        assert.equal(eth.valueOf(), web3.toWei(2.5+3, 'ether')); // preBuy eth + 3 eth 
+        assert.equal(eth.toNumber(), web3.toWei(2.5+3, 'ether')); // preBuy eth + 3 eth 
     })
   });
 
@@ -203,8 +203,8 @@ contract('BTPToken', function(accounts) {
         crowdsale.balanceOf.call(web3.eth.accounts[4]),
         crowdsale.balanceOf.call(web3.eth.accounts[5]),
         (toBalance, fromBalance) => {
-            assert.equal(toBalance.valueOf(), EXPECT_FOR_ONE_ETH+50)
-            assert.equal(fromBalance.valueOf(), EXPECT_FOR_ONE_ETH-50)
+            assert.equal(toBalance.toNumber(), EXPECT_FOR_ONE_ETH+50)
+            assert.equal(fromBalance.toNumber(), EXPECT_FOR_ONE_ETH-50)
         }
       )
     })
@@ -219,7 +219,7 @@ contract('BTPToken', function(accounts) {
        return crowdsale.balanceOf.call(crowdsale.address)
     })
     .then(function(bal) {
-      assert.equal(bal.valueOf(), 50)
+      assert.equal(bal.toNumber(), 50)
 
       // TODO: should we test whether withdrawToken can't be called by non owners
       return crowdsale.withdrawToken(crowdsale.address, { from: ownerAddr })
@@ -228,7 +228,7 @@ contract('BTPToken', function(accounts) {
       return crowdsale.balanceOf.call(crowdsale.address)
     })
     .then(function(bal) {
-      assert.equal(bal.valueOf(), 0)
+      assert.equal(bal.toNumber(), 0)
     })
   })
 

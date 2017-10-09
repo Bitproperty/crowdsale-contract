@@ -50,7 +50,7 @@ contract('BTPToken - prices', function(accounts) {
   it("should start with 0 eth", function() {
     return crowdsale.etherRaised.call()
     .then(function(eth) {
-      assert.equal(eth.valueOf(), 0);
+      assert.equal(eth.toNumber(), 0);
     })
   });
 
@@ -69,8 +69,8 @@ contract('BTPToken - prices', function(accounts) {
             if (err) reject(err) 
             
             crowdsale.balanceOf(participiant.account).then(function(res) {
-              //console.log(res.valueOf(), price);
-              assert.equal(res.valueOf(), price);
+              //console.log(res.toNumber(), price);
+              assert.equal(res.toNumber(), price);
               resolve()
             }).catch(reject)
 
