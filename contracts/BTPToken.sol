@@ -21,8 +21,8 @@ contract BTPToken is VestedToken {
   uint public priceUpdated; // will be initialized in constructor
 
   // BTP Token Limits
-  uint public constant ALLOC_TEAM =           882977242*DECIMALS; // team + advisors + BTPCorp
-  uint public constant ALLOC_CROWDSALE =     1000000000*DECIMALS;
+  uint public constant ALLOC_TEAM =          1382977242*DECIMALS; // team + advisors + BTPCorp
+  uint public constant ALLOC_CROWDSALE =      500000000*DECIMALS;
   uint public constant ALLOC_PREBUY =        1017022758*DECIMALS; // total allocated for the pre-buy
   // sum should be 2900000000
 
