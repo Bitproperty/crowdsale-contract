@@ -21,8 +21,8 @@ contract BTPToken is VestedToken {
   uint public priceUpdated; // will be initialized in constructor
 
   // BTP Token Limits
-  uint public constant ALLOC_TEAM =           882977242*DECIMALS; // team + advisors + BTPCorp
-  uint public constant ALLOC_CROWDSALE =     1000000000*DECIMALS;
+  uint public constant ALLOC_TEAM =          1382977242*DECIMALS; // team + advisors + BTPCorp
+  uint public constant ALLOC_CROWDSALE =      500000000*DECIMALS;
   uint public constant ALLOC_PREBUY =        1017022758*DECIMALS; // total allocated for the pre-buy
   // sum should be 2900000000
 
@@ -146,30 +146,31 @@ contract BTPToken is VestedToken {
     return super.transferFrom(_from, _to, _value);
   }
 
+  // NOTE: remove Bonus Rate
   //constant function returns the current token price.
-  function getPriceRate()
-      internal
-      returns (uint o_rate)
-  {
-      // pitfall: if nobody invests for 24 hours, it won't move with a 1 step for 24 hours rate
-      //if (now-priceUpdated > 24 hours) {
-      //   tokensForEthNow = (tokensForEthNow * 9) / 10;
-      //   priceUpdated = now;
-      //}
+  //function getPriceRate()
+  //    internal
+  //    returns (uint o_rate)
+  //{
+  //    // pitfall: if nobody invests for 24 hours, it won't move with a 1 step for 24 hours rate
+  //    //if (now-priceUpdated > 24 hours) {
+  //    //   tokensForEthNow = (tokensForEthNow * 9) / 10;
+  //    //   priceUpdated = now;
+  //    //}
 
-    if (publicStartTime < now && publicEndTime > now) {
-      uint delta = SafeMath.div(SafeMath.sub(now, priceUpdated), 1 days);
+  //  if (publicStartTime < now && publicEndTime > now) {
+  //    uint delta = SafeMath.div(SafeMath.sub(now, priceUpdated), 1 days);
 
-      if (delta > 0) {
-        for (uint256 i = 0; i < delta; i++)
-          tokensForEthNow = (tokensForEthNow * 9) / 10;
+  //    if (delta > 0) {
+  //      for (uint256 i = 0; i < delta; i++)
+  //        tokensForEthNow = (tokensForEthNow * 9) / 10;
 
-        priceUpdated += delta * 1 days;
-      }
-    }
+  //      priceUpdated += delta * 1 days;
+  //    }
+  //  }
 
-    return tokensForEthNow;
-  }
+  //  return tokensForEthNow;
+  //}
 
   // calculates wmount of tokens we get, given the wei and the rates we've defined per 1 eth
   function calcAmount(uint _wei, uint _rate) 
@@ -220,7 +221,7 @@ contract BTPToken is VestedToken {
     // Such increments should happen first; if processPurchase() fails (throws), it will not count
     etherRaised += msg.value;
 
-    uint amount = processPurchase(getPriceRate(), SafeMath.sub(ALLOC_CROWDSALE, BTPSold));
+    uint amount = processPurchase(tokensForEthNow, SafeMath.sub(ALLOC_CROWDSALE, BTPSold));
     BTPSold += amount;
 
     Buy(msg.sender, amount);

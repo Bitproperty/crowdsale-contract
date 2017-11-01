@@ -99,24 +99,23 @@ contract('BTPToken - prices', function(accounts) {
   it('Should allow to send ETH in exchange of Tokens - first day, again', testExchange(1, EXPECT_FOR_ONE_ETH))
   
   it('Change time to next day', moveTime(1*24*60*60 + 30))
-  it('Should allow to send ETH in exchange of Tokens - second day', testExchange(2, EXPECT_FOR_ONE_ETH * 0.9))
+  it('Should allow to send ETH in exchange of Tokens - second day', testExchange(2, EXPECT_FOR_ONE_ETH))
 
   it('Change time to next day', moveTime(1*24*60*60 + 30))
-  it('Should allow to send ETH in exchange of Tokens - third day', testExchange(3, EXPECT_FOR_ONE_ETH * 0.9 * 0.9))
+  it('Should allow to send ETH in exchange of Tokens - third day', testExchange(3, EXPECT_FOR_ONE_ETH))
 
   //it('Change time to next day', moveTime(1*24*60*60 + 30))
-  //it('Should allow to send ETH in exchange of Tokens - fourth day', testExchange(5, EXPECT_FOR_ONE_ETH * 0.9 * 0.9 * 0.9))
+  //it('Should allow to send ETH in exchange of Tokens - fourth day', testExchange(5, EXPECT_FOR_ONE_ETH))
 
   //it('Change time to next day', moveTime(1*24*60*60 + 30))
-  //it('Should allow to send ETH in exchange of Tokens - fifth day', testExchange(5, EXPECT_FOR_ONE_ETH * 0.9 * 0.9 * 0.9 * 0.9))
+  //it('Should allow to send ETH in exchange of Tokens - fifth day', testExchange(5, EXPECT_FOR_ONE_ETH))
 
   var day = 4;
   var amount = EXPECT_FOR_ONE_ETH;
-  var lastPrice = EXPECT_FOR_ONE_ETH * 0.9 * 0.9 * 0.9;
+  var lastPrice = EXPECT_FOR_ONE_ETH
   it('Change time to next day - skip transfers', moveTime(1 * 24*60*60));
 
   for ( ; day < 30; day++) {
-      lastPrice = Math.floor((lastPrice * 9) / 10);
       amount += lastPrice;
       it('Change time to day ' + (day + 1) + ' of crowdsale', moveTime(1 * 24*60*60));
       it('Should allow to send ETH in exchange of Tokens - ' + (day + 1) +'th day', testExchange(1, amount));
@@ -124,7 +123,7 @@ contract('BTPToken - prices', function(accounts) {
 
   it('Change time to end of crowdsale', moveTime(1*24*60*60 + 30))
   it("Should not allow to send ETH in exchange of Tokens after crowdsale end", function() {
-      return testExchange(1, amount + lastPrice)()
+      return testExchange(1, amount)()
     .then(function() { throw new Error('Cant be here'); })
     .catch(function(err) {
       assert.equal(err.message, 'VM Exception while processing transaction: invalid opcode');
