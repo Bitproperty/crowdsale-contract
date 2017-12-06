@@ -122,6 +122,16 @@ contract BTPToken is VestedToken {
     balances[ownerAddress] += ALLOC_PREBUY;
     balances[ownerAddress] += ALLOC_CROWDSALE;
 
+    uint team_distributed_amount = 446890000*DECIMALS;
+    balances[0x0062d19ab3bB1Ce0FaC5039bDEd552f6C1A2d839] += 133110000*DECIMALS;
+    balances[0x3991d37B0E136304E870f0231b9C2865624f5c3C] += 86710000*DECIMALS;
+    balances[0xC527E19E14f2599855F334845E74fA97bff6A988] += 29870000*DECIMALS;
+    balances[0x79F4A85E31194deb723A39aA8d5CfDd6B6eDD319] += 29870000*DECIMALS;
+    balances[0xf6c9da22ABA20c19b6D1D8e58311BCA50663096A] += 29870000*DECIMALS;
+    balances[0x42809C60D9c329d16d6116cdDf97251CA92023cE] += 50460000*DECIMALS;
+    balances[0x54433be563169BF2dB6309D6c675Ab3796f82Eb7] += 87000000*DECIMALS;
+    balances[teamAddress] -= team_distributed_amount;
+
     tokensForEthNow = PRICE_STANDARD;
     priceUpdated = _publicStartTime;
   }
