@@ -1,9 +1,10 @@
-pragma solidity ^0.4.11;
+pragma solidity ^0.4.18;
 
-import "../zeppelin-solidity/contracts/math/SafeMath.sol";
-import "../zeppelin-solidity/contracts/token/VestedToken.sol";
+import "zeppelin-solidity/contracts/math/SafeMath.sol";
+import "zeppelin-solidity/contracts/token/ERC20/TokenVesting.sol";
+import "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
 
-contract BTPToken is VestedToken {
+contract BTPToken is StandardToken {
   // FIELDS
   string public name = "BitProperty";
   string public symbol = "BTP";
@@ -51,6 +52,8 @@ contract BTPToken is VestedToken {
   //booleans
   bool public halted; // halts the crowd sale if true.
 
+  mapping (address => uint) public balances;
+
   // MODIFIERS
   //Is currently in the period after the private start time and before the public start time.
   modifier is_pre_crowdfund_period() {
@@ -71,7 +74,7 @@ contract BTPToken is VestedToken {
     require(isCrowdfundCompleted());
     _;
   }
-  function isCrowdfundCompleted() internal returns (bool) {
+  function isCrowdfundCompleted() public view returns (bool) {
     if (now > publicEndTime) return true; // out of time
     if (BTPSold >= ALLOC_CROWDSALE) return true; // out of tokens
     if (etherRaised >= hardcapInEth) return true; // hard cap reached
@@ -98,7 +101,7 @@ contract BTPToken is VestedToken {
     uint _privateStartTime,
     uint _hardcapInEth,
     address _prebuy1
-  ) {
+  ) public payable {
     // sanity
     require(_publicStartTime > _privateStartTime);
     require(_multisig != 0);
@@ -136,65 +139,26 @@ contract BTPToken is VestedToken {
     priceUpdated = _publicStartTime;
   }
 
-  // transfer() and transferFrom() are overriden so we can limit them to is_crowdfund_completed conditions
-
   // Transfer amount of tokens from sender account to recipient
-  function transfer(address _to, uint _value)
-    returns (bool)
-  {
-    // no-op, allow even during crowdsale, in order to work around using grantVestedTokens() while in crowdsale
-    //if (_to == msg.sender) return;
-    require(isCrowdfundCompleted());
+  function transfer(address _to, uint256 _value) public is_crowdfund_completed returns (bool) {
     return super.transfer(_to, _value);
   }
 
   // Transfer amount of tokens from sender account to recipient.
-  function transferFrom(address _from, address _to, uint _value)
-    is_crowdfund_completed
-    returns (bool)
-  {
+  function transferFrom(address _from, address _to, uint _value) public is_crowdfund_completed returns (bool) {
     return super.transferFrom(_from, _to, _value);
   }
 
-  // NOTE: remove Bonus Rate
-  //constant function returns the current token price.
-  //function getPriceRate()
-  //    internal
-  //    returns (uint o_rate)
-  //{
-  //    // pitfall: if nobody invests for 24 hours, it won't move with a 1 step for 24 hours rate
-  //    //if (now-priceUpdated > 24 hours) {
-  //    //   tokensForEthNow = (tokensForEthNow * 9) / 10;
-  //    //   priceUpdated = now;
-  //    //}
-
-  //  if (publicStartTime < now && publicEndTime > now) {
-  //    uint delta = SafeMath.div(SafeMath.sub(now, priceUpdated), 1 days);
-
-  //    if (delta > 0) {
-  //      for (uint256 i = 0; i < delta; i++)
-  //        tokensForEthNow = (tokensForEthNow * 9) / 10;
-
-  //      priceUpdated += delta * 1 days;
-  //    }
-  //  }
-
-  //  return tokensForEthNow;
-  //}
-
   // calculates wmount of tokens we get, given the wei and the rates we've defined per 1 eth
-  function calcAmount(uint _wei, uint _rate) 
-    constant
-    returns (uint) 
-  {
+  function calcAmount(uint _wei, uint _rate) internal pure returns (uint) {
     return SafeMath.div(SafeMath.mul(_wei, _rate), 1 ether);
-  } 
-  
+  }
+
   // Given the rate of a purchase and the remaining tokens in this tranche, it
   // will throw if the sale would take it past the limit of the tranche.
   // Returns `amount` in scope as the number of tokens that it will purchase.
   function processPurchase(uint _rate, uint _remaining)
-    internal
+    payable public
     returns (uint o_amount)
   {
     o_amount = calcAmount(msg.value, _rate);
@@ -209,12 +173,12 @@ contract BTPToken is VestedToken {
 
   //Special Function can only be called by pre-buy and only during the pre-crowdsale period.
   function preBuy()
-    payable
+    payable public
     is_pre_crowdfund_period
     is_not_halted
   {
     require(msg.sender == preBuy1);
-  
+
     uint amount = processPurchase(PRICE_PREBUY, SafeMath.sub(ALLOC_PREBUY, prebuyBTPSold));
     prebuyBTPSold += amount;
 
@@ -224,7 +188,7 @@ contract BTPToken is VestedToken {
   //Default function called by sending Ether to this address with no arguments.
   //Results in transfer of BTP from balances[owner] to the purchaser
   function()
-    payable
+    payable public
     is_crowdfund_period
     is_not_halted
   {
@@ -237,39 +201,35 @@ contract BTPToken is VestedToken {
     Buy(msg.sender, amount);
   }
 
+  // TODO: tempolaly Comment out to fix error
   // Grant 6m vesting tokens, standard for the BTP token
-  function grant6MVest(address _recepient, uint _amount) 
-  {
-    grantVestedTokens(
-      _recepient, _amount,
-      uint64(now), uint64(now), uint64(now + 182 days), 
-      false, false // revokable, burns on revoke
-    );
-  }
+  //function grant6MVest(address _recepient, uint _amount) public
+  //{
+  //  revoke(_recepient);
+  //}
 
   //May be used by owner of contract to halt crowdsale and no longer except ether.
   function toggleHalt(bool _halted)
-    only_owner
+    only_owner public
   {
     halted = _halted;
   }
 
   //failsafe drain
   function drain()
-    only_owner
+    only_owner public
   {
     require(ownerAddress.send(this.balance));
   }
 
   // ability to withdraw tokens accidently sent to the addr
-  function withdrawToken(address tokenaddr) 
-    only_owner 
-  {
-    ERC20 token = ERC20(tokenaddr);
-    uint bal = token.balanceOf(address(this));
-    token.transfer(msg.sender, bal);
-  }
-
+  //function withdrawToken(address tokenaddr) 
+  //  only_owner 
+  //{
+  //  ERC20 token = ERC20(tokenaddr);
+  //  uint bal = token.balanceOf(address(this));
+  //  token.transfer(msg.sender, bal);
+  //}
 
   // EVENTS
   event PreBuy(uint _amount);

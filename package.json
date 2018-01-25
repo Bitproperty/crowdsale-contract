@@ -7,11 +7,15 @@
   "author": "Ivo Georgiev",
   "license": "MIT",
   "scripts": {
-    "test": "truffle test"
+    "test": "truffle test --network ganache",
+    "build": "truffle deploy --network ganache",
+    "console": "truffle console --network ganache"
   },
   "dependencies": {
-    "bluebird": "^3.5.0",
-    "solc": "^0.4.16",
-    "truffle": "^3.2.5"
+    "bluebird": "3.5.1",
+    "solc": "0.4.18",
+    "truffle": "4.0.5",
+    "truffle-hdwallet-provider": "0.0.3",
+    "zeppelin-solidity": "^1.6.0"
   }
 }
